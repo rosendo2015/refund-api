@@ -1,10 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { AppError } from "@/utils/AppError";
-import { decodeToken, TokenPayload } from "@/utils/decodeToken"
+import { verify } from "jsonwebtoken";
+import { authConfig } from "@/configs/auth";
 
-function ensureAuthenticated(
-    request: Request, response: Response, next: NextFunction
-): void {
+interface TokenPayload {
+    role: string
+    sub: string
+}
+
+function ensureAuthenticated(request: Request, response: Response, next: NextFunction) {
     try {
         const authHeader = request.headers.authorization;
         if (!authHeader) {
@@ -14,7 +18,7 @@ function ensureAuthenticated(
         if (!token) {
             throw new AppError("JWT token is missing", 401)
         }
-        const { role, sub: user_id } = decodeToken(token)
+        const { role, sub: user_id } = verify(token, authConfig.jwt.secret) as TokenPayload
         request.user = { id: user_id, role }
         return next();
     } catch (error) {
