@@ -18,7 +18,7 @@ class UploadsController {
             const file = fileSchema.parse(request.file)
             const filename = await diskStorage.saveFile(file.filename)
 
-            response.json({ message: `Arquivo enviado com sucesso! ${filename}` })
+            response.status(201).json({ message: `Arquivo enviado com sucesso! ${filename}`, filename })
         } catch (error) {
             if (error instanceof ZodError) {
                 if (request.file) {

@@ -12,7 +12,7 @@ class RefundsController {
         const bodySchema = z.object({
             name: z.string().trim().min(1, { message: "Informe o nome da solicitação" }),
             category: CategoriesEnum,
-            amount: z.number().positive({ message: "O valor deve ser positivo." }),
+            amount: z.coerce.number().positive({ message: "O valor deve ser positivo." }),
             filename: z.string().min(6)
         })
         const { name, category, amount, filename } = bodySchema.parse(request.body)
