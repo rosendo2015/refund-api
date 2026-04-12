@@ -61,7 +61,7 @@ class RefundsController {
         })
 
         const totalPages = Math.ceil(totalRecords / perPage)
-        response.json({
+        response.status(200).json({
             refunds,
             pagination: {
                 page,
@@ -81,7 +81,7 @@ class RefundsController {
             where: { id },
             include: { user: true }
         })
-        return response.json({ refund })
+        return response.status(200).json(refund)
     }
 }
 export { RefundsController }
