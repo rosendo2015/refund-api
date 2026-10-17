@@ -1,166 +1,143 @@
-# Refund V2 - Sistema de Reembolso de Despesas
+# Refund API
 
-## Visão Geral
+## Overview
 
-Refund V2 é uma aplicação web moderna construída com React, TypeScript e Vite. Este projeto representa uma evolução de um sistema anterior, focando na gestão de reembolsos de despesas de funcionários com recursos aprimorados e arquitetura melhorada.
+`refund-api` is a Node.js/TypeScript REST API for handling refund requests. It provides endpoints for:
 
-## Preview
+- Creating, listing and processing refund requests
+- Managing user accounts and authentication
+- Session handling
+- File uploads (e.g., proof of purchase images)
 
-![Preview](./.github/preview.png)
+The API uses **Express** for routing, **Prisma** as the ORM, **PostgreSQL** (or SQLite) as the database, and **JWT** for authentication.
 
-## Principais Recursos
+![Preview Desktop](./.github/preview.png)
 
-- **Autenticação baseada em papéis**: Sistema de login seguro com diferentes níveis de acesso para funcionários e gerentes
-- **Gestão de Despesas**: Sistema completo para submissão, acompanhamento e aprovação de reembolsos de despesas
-- **Design Responsivo**: Interface amigável para dispositivos móveis usando Tailwind CSS
-- **Validação de Formulários**: Validação robusta com Zod
-- **Integração com API**: Comunicação fluida com serviços de backend
+## Tech Stack
 
-## Stack Tecnológico
+- **Node.js** (v20+)
+- **TypeScript**
+- **Express** – HTTP server
+- **Prisma** – Database ORM (PostgreSQL / SQLite)
+- **bcrypt** – Password hashing
+- **jsonwebtoken** – JWT based auth
+- **multer** – File uploads handling
+- **zod** – Request validation
+- **cors** – Cross‑origin resource sharing
 
-### Frontend
+## Prerequisites
 
-- React 19.2.4
-- TypeScript 5.9.3
-- Vite 8.0.1
-- Tailwind CSS 4.2.2
+- **Node.js** (v20 or later) installed
+- **npm** (comes with Node) or **yarn**
+- A **PostgreSQL** database (or SQLite for quick testing)
+- **Git** (optional, for cloning the repo)
 
-### Bibliotecas
-
-- Axios 1.15.0 (cliente HTTP)
-- React Router 7.14.0 (roteamento)
-- Zod 4.3.6 (validação)
-
-## Estrutura do Projeto
-
-```
-.
-├── .git/
-├── .gitignore
-├── index.html
-├── package-lock.json
-├── package.json
-├── public/
-├── README.md
-├── src/
-│ ├── App.tsx
-│ ├── components/
-│ ├── contexts/
-│ │ └── AuthContext.tsx
-│ ├── hooks/
-│ │ └── useAuth.tsx
-│ ├── main.tsx
-│ ├── pages/
-│ ├── routes/
-│ │ ├── auth-routes.tsx
-│ │ ├── employee-routes.tsx
-│ │ ├── index.tsx
-│ │ └── manager-routes.tsx
-│ ├── services/
-│ │ └── api.ts
-│ └── types/
-├── tsconfig.app.json
-├── tsconfig.json
-├── tsconfig.node.json
-└── vite.config.ts
-```
-
-## Primeiros Passos
-
-### Pré-requisitos
-
-- Node.js (versão 18 ou superior)
-- npm ou yarn
-
-### Instalação
-
-1. Clone o repositório:
+## Getting Started
 
 ```bash
-git clone [repository-url]
-```
+# Clone the repository
+git clone <repository-url>
+cd refund-api
 
-2. Navegue até o diretório do projeto:
-
-```bash
-cd refund-v2
-```
-
-3. Instale as dependências:
-
-```bash
+# Install dependencies
 npm install
 ```
 
-### Executando a Aplicação
+### Environment Variables
 
-- Servidor de desenvolvimento:
+Create a `.env` file in the project root based on the example below:
+
+```dotenv
+# Server
+PORT=3000
+
+# Database (PostgreSQL example)
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DATABASE?schema=public
+
+# JWT secret (use a strong random string)
+JWT_SECRET=your_jwt_secret_here
+
+# Multer upload directory (relative to project root)
+UPLOAD_DIR=./tmp/uploads
+```
+
+### Database Setup
 
 ```bash
+# Generate Prisma client and apply migrations
+npx prisma generate
+npx prisma migrate dev --name init
+```
+
+If you prefer SQLite for local development, set:
+
+```dotenv
+DATABASE_URL="file:./dev.db"
+```
+
+### Running the API
+
+```bash
+# Development mode (watch files)
 npm run dev
 ```
 
-- Build de produção:
+The server will start on `http://localhost:3000` (or the port defined in `.env`).
+
+## API Endpoints Overview
+
+| Method   | Path             | Description                                              |
+| -------- | ---------------- | -------------------------------------------------------- |
+| `POST`   | `/auth/register` | Register a new user (email + password)                   |
+| `POST`   | `/auth/login`    | Authenticate and receive a JWT                           |
+| `GET`    | `/users/me`      | Get authenticated user profile                           |
+| `GET`    | `/refunds`       | List refunds (authenticated)                             |
+| `POST`   | `/refunds`       | Create a new refund request (multipart for proof upload) |
+| `GET`    | `/refunds/:id`   | Get a specific refund                                    |
+| `PUT`    | `/refunds/:id`   | Update a refund (e.g., status)                           |
+| `DELETE` | `/refunds/:id`   | Delete a refund                                          |
+| `POST`   | `/uploads`       | Upload a file (used internally by refund routes)         |
+
+> **Note:** All routes under `/refunds`, `/users`, and `/uploads` require a valid `Authorization: Bearer <token>` header.
+
+## Project Structure
+
+```
+src/
+├─ middlewares/          # Express middlewares (auth, error handling)
+├─ providers/            # Service providers (e.g., storage)
+├─ routes/               # Route definitions
+│   ├─ refunds-routes.ts
+│   ├─ users-routes.ts
+│   ├─ sessions-routes.ts
+│   └─ uploads-routes.ts
+├─ utils/                # Helper utilities (AppError, etc.)
+├─ generated/prisma/     # Prisma generated client & schema files
+├─ server.ts             # Main entry point
+└─ ...
+```
+
+## Testing
+
+Add your tests in a `tests/` directory (not yet included). You can run them with:
 
 ```bash
-npm run build
+npm test
 ```
 
-- Pré-visualizar build de produção:
+## Contributing
 
-```bash
-npm run preview
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Commit your changes (`git commit -m "Add feature"`)
+4. Push to your fork (`git push origin feature/your-feature`)
+5. Open a Pull Request
 
-```
+Please follow the existing code style and write unit tests for new functionality.
 
-### Sistema de Autenticação
+## License
 
-A aplicação possui um sistema de autenticação robusto com:
-
-1. AuthContext: Gerencia sessões de usuários e estado de autenticação
-
-2. Hook useAuth: Facilita o acesso ao estado e funções de autenticação
-
-3. Rotas baseadas em papéis: Diferentes rotas para funcionários e gerentes
-
-### Integração com API
-
-A aplicação conecta-se a um backend API com a seguinte configuração:
-
-```typescript
-// src/services/api.ts
-import axios from "axios";
-
-export const api = axios.create({
-  baseURL: "http://localhost:3333",
-});
-```
-
-### Práticas de Desenvolvimento
-
-- Segurança de Tipos: Uso abrangente de TypeScript em toda a aplicação
-
-- Qualidade de Código: Integração com ESLint para manter a qualidade do código
-
-- Arquitetura Modular: Componentes e serviços bem organizados
-
-### Contribuindo
-
-Contribuições são bem-vindas. Siga estes passos:
-
-1. Faça um fork do repositório
-
-2. Crie uma branch de feature (git checkout -b feature/AmazingFeature)
-
-3. Faça commit das suas alterações (git commit -m 'Add some AmazingFeature')
-
-4. Faça push para a branch (git push origin feature/AmazingFeature)
-
-5. Abra um Pull Request
-
-## Licença
-
-Este projeto está licenciado sob a Licença MIT - veja o arquivo [Parece que o resultado não era seguro para exibição. Vamos mudar as coisas e tentar outra opção!] para mais detalhes.
+This project is licensed under the **ISC** license.
 
 ---
 
